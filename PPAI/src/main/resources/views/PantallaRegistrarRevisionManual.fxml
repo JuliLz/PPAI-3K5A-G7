@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane style="-fx-background-color: #f4f4f4; -fx-padding: 40;"
+            prefWidth="600" prefHeight="400"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual">
+    <TableView fx:id="tablaEventos" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" editable="true">
+        <columns>
+            <TableColumn fx:id="colSeleccionar" text="Seleccionar" prefWidth="80" reorderable="false" editable="true" sortable="false" resizable="false"/>
+            <TableColumn fx:id="colFechaHora" text="Fecha y Hora" prefWidth="150" reorderable="false" editable="false" sortable="false" resizable="false"/>
+            <TableColumn fx:id="colMagnitud" text="Magnitud" prefWidth="100" reorderable="false" editable="false" sortable="false" resizable="false"/>
+            <TableColumn fx:id="colLugarOrigen" text="Lugar de Origen" prefWidth="200" reorderable="false" editable="false" sortable="false" resizable="false"/>
+        </columns>
+    </TableView>
+    <Button text="Continuar" fx:id="btnContinuar" onAction="#tomarSeleccionEventoSismico"
+            style="-fx-font-size: 14px; -fx-pref-width: 150px;"
+            AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+</AnchorPane>

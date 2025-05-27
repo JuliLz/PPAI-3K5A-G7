@@ -47,7 +47,7 @@ public class EventoSismico {
     @JoinColumn(name = "analista_supervisor_legajo", referencedColumnName = "id")
     private Empleado analistaSupervisor;
 
-    @OneToMany
+    @OneToMany (fetch = FetchType.EAGER)
     @JoinColumns({
             @JoinColumn(name = "origen_generacion", referencedColumnName = "origenGeneracion"),
             @JoinColumn(name = "fecha_hora_ocurrencia", referencedColumnName = "fechaHoraOcurrencia")
@@ -202,6 +202,9 @@ public class EventoSismico {
     }
 
     public Boolean estaPendienteRevision() {
-        return this.estadoActual.estaPendienteRevision();
+        if (estadoActual.getNombre().equals("Pendiente revision") && estadoActual.getAmbito().equals("Evento sismico")) {
+            return true;
+        }
+        return false;
     }
 }

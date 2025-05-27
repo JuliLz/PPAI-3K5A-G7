@@ -37,7 +37,7 @@ public class Estado {
     }
 
     public Boolean estaPendienteRevision() {
-        if (nombre == "Pendiente revisión" && ambito == "Evento sismico") {
+        if (nombre.equals("Pendiente revision") && ambito.equals("Evento sismico")) {
             return true;
         }
         return false;

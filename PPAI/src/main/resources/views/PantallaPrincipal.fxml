@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="20" alignment="CENTER" style="-fx-background-color: #f4f4f4; -fx-padding: 40;"
+      fx:controller="com.grupo7.dsi.tpai.controllers.VentanaPrincipalController">
+    <children>
+
+        <ImageView fitWidth="80" fitHeight="80" preserveRatio="true">
+            <image>
+                <Image url="/views/sismografia.png" />
+            </image>
+        </ImageView>
+
+        <Label text="Gestión de Eventos Sísmicos">
+            <font>
+                <Font name="Arial Bold" size="24"/>
+            </font>
+        </Label>
+
+        <Button text="Registrar resultado de revisión manual" fx:id="btnRegistrarRevision" onAction="#handleRegistrarRevision"
+                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+
+        <Button text="Cerrar Orden de Inspección" fx:id="btnConsultarEventos"
+                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+
+        <Button text="Generar reporte" fx:id="btnGenerarReporte"
+                style="-fx-font-size: 14px; -fx-pref-width: 300px;" />
+
+        <Button text="Salir" fx:id="btnSalir" onAction="#handleSalir"
+                style="-fx-font-size: 14px; -fx-pref-width: 300px; -fx-background-color: #ff4d4d; -fx-text-fill: white;" />
+    </children>
+</VBox>
