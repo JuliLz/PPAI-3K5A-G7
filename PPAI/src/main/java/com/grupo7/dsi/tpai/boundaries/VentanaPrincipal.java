@@ -1,6 +1,7 @@
 package com.grupo7.dsi.tpai.boundaries;
 
 import com.grupo7.dsi.tpai.Springboot;
+import com.grupo7.dsi.tpai.boundaries.utils.SpringFXMLLoader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

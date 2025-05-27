@@ -28,6 +28,10 @@ public class Empleado {
         this.rol = rol;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     public String getNombre() {
         return nombre;
     }

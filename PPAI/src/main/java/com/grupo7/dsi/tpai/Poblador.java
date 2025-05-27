@@ -1,35 +1,42 @@
 package com.grupo7.dsi.tpai;
 
-import com.grupo7.dsi.tpai.controllers.RegistrarRevisionManualController;
+import com.grupo7.dsi.tpai.models.*;
 import com.grupo7.dsi.tpai.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication
-public class Poblador {
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan("com.grupo7.dsi.tpai.service")
+public class Poblador implements CommandLineRunner {
+
+    @Autowired private EstadoService estadoService;
+    @Autowired private EmpleadoService empleadoService;
+    @Autowired private CambioEstadoService cambioEstadoService;
+    @Autowired private AlcanceSismoService alcanceSismoService;
+    @Autowired private OrigenDeGeneracionService origenDeGeneracionService;
+    @Autowired private MagnitudRichterService magnitudRichterService;
+    @Autowired private ClasificacionSismoService clasificacionSismoService;
+    @Autowired private EventoSismicoService eventoSismicoService;
 
     public static void main(String[] args) {
-        SpringApplication.run(Springboot.class, args);
+        // Arranca un contexto Spring ligero SOLO con Poblador
+        SpringApplication.run(Poblador.class, args).close();
     }
 
-    // Esta clase se ejecuta para guardar objetos en la base de datos, se inyectan los servicios.
-
-    //@Bean
-    public CommandLineRunner initData(RegistrarRevisionManualController gestorCrudRevisionManual,
-                                      EventoSismicoService eventoSismicoService,
-                                      EstadoService estadoService,
-                                      AlcanceSismoService alcanceSismoService,
-                                      OrigenDeGeneracionService origenDeGeneracionService,
-                                      MagnitudRichterService magnitudRichterService,
-                                      ClasificacionSismoService clasificacionSismoService,
-                                      CambioEstadoService cambioEstadoService,
-                                      EmpleadoService empleadoService) {
-        return args -> {
+    @Override
+    public void run(String... args) throws Exception {
 
 
-            /*
+
             Estado estadoPendienteRevision = new Estado();
             estadoPendienteRevision.setAmbito("Evento sismico");
             estadoPendienteRevision.setNombre("Pendiente revision");
@@ -49,17 +56,16 @@ public class Poblador {
             estadoRechazado.setNombre("Rechazado");
             estadoService.save(estadoRechazado);
 
+            Empleado empleado = new Empleado();
+            empleado.setNombre("Cristian");
+            empleado.setApellido("Castro");
+            empleado.setTelefono("341-1234567");
+            empleado = empleadoService.save(empleado);
 
             // fechaHoraInicio
             LocalDateTime fechaHoraInicio = LocalDateTime.of(2023, 10, 1, 0, 0);
             LocalDateTime fechaHoraFin = LocalDateTime.of(2023, 10, 1, 23, 59);
 
-            // Empleado
-            Empleado empleado1 = new Empleado();
-            empleado1.setNombre("Cristian");
-            empleado1.setApellido("Castro");
-            empleado1.setTelefono("341-1234567");
-            empleadoService.save(empleado1);
 
             // Cambios de estado
             CambioEstado cambioEstado1 = new CambioEstado();
@@ -186,6 +192,7 @@ public class Poblador {
             evento1.setClasificacion(clasificacionModerada);
             evento1.setMagnitud(magnitudMedia);
             evento1.setOrigenGeneracion(origenSanJuan);
+            evento1.setAnalistaSupervisor(empleado);
             evento1.setAlcanceSismo(alcanceRegional);
             eventoSismicoService.save(evento1);
 
@@ -201,6 +208,7 @@ public class Poblador {
             evento2.setEstadoActual(estadoPendienteRevision);
             evento2.setCambiosEstado(cambiosEstado);
             evento2.setClasificacion(clasificacionProfunda);
+            evento2.setAnalistaSupervisor(empleado);
             evento2.setMagnitud(magnitudAlta);
             evento2.setOrigenGeneracion(origenSanJuan);
             evento2.setAlcanceSismo(alcanceRegional);
@@ -217,6 +225,7 @@ public class Poblador {
             evento3.setEstadoActual(estadoPendienteRevision);
             evento3.setCambiosEstado(cambiosEstado);
             evento3.setClasificacion(clasificacionIntermedia);
+            evento3.setAnalistaSupervisor(empleado);
             evento3.setMagnitud(magnitudSevera);
             evento3.setOrigenGeneracion(origenMendoza);
             evento3.setAlcanceSismo(alcanceInternacional);
@@ -233,6 +242,7 @@ public class Poblador {
             evento4.setEstadoActual(estadoAutoDetectado);
             evento4.setClasificacion(clasificacionSuperficial);
             evento4.setMagnitud(magnitudLeve);
+            evento4.setAnalistaSupervisor(empleado);
             evento4.setOrigenGeneracion(origenSalta);
             evento4.setAlcanceSismo(alcanceProvincial);
             eventoSismicoService.save(evento4);
@@ -250,6 +260,7 @@ public class Poblador {
             evento5.setClasificacion(clasificacionSuperficial);
             evento5.setMagnitud(magnitudAlta); // el original 2.5f
             evento5.setOrigenGeneracion(origenSalta); // Cordoba
+            evento5.setAnalistaSupervisor(empleado);
             evento5.setAlcanceSismo(alcanceProvincial); // Local
             eventoSismicoService.save(evento5);
 
@@ -264,6 +275,7 @@ public class Poblador {
             evento6.setEstadoActual(estadoPendienteRevision);
             evento6.setCambiosEstado(cambiosEstado);
             evento6.setClasificacion(clasificacionSuperficial);
+            evento6.setAnalistaSupervisor(empleado);
             evento6.setMagnitud(magnitudLeve);
             evento6.setOrigenGeneracion(origenSalta);
             evento6.setAlcanceSismo(alcanceProvincial);
@@ -281,6 +293,7 @@ public class Poblador {
             evento7.setCambiosEstado(cambiosEstado);
             evento7.setClasificacion(clasificacionIntermedia);
             evento7.setMagnitud(magnitudSevera);
+            evento7.setAnalistaSupervisor(empleado);
             evento7.setOrigenGeneracion(origenMendoza);
             evento7.setAlcanceSismo(alcanceInternacional);
             eventoSismicoService.save(evento7);
@@ -298,12 +311,9 @@ public class Poblador {
             evento8.setClasificacion(clasificacionIntermedia); // Clasificacion 1
             evento8.setMagnitud(magnitudLeve); // 2.5f
             evento8.setOrigenGeneracion(origenMendoza); // Cordoba
+            evento8.setAnalistaSupervisor(empleado);
             evento8.setAlcanceSismo(alcanceProvincial); // Local
             eventoSismicoService.save(evento8);
 
-*/
-
         };
     }
-
-}

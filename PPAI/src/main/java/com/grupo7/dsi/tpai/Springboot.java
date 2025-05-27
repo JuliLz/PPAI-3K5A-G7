@@ -17,16 +17,8 @@ public class Springboot {
 
     @Bean
     public CommandLineRunner initData() {
-        return args -> {
-
-             //PantallaTerminalRegistrarRevisionManual pantallaTerminal = new PantallaTerminalRegistrarRevisionManual();
-             //pantallaTerminal.opcRegistrarResultadosDeRevisionManual(gestorCrudRevisionManual);
-             //pantallaTerminal.tomarSeleccion();
-
-
-        };
+        return args -> {};
     }
-
 }
 
 
