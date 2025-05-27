@@ -40,6 +40,13 @@ public class CambioEstado {
 
     public CambioEstado() {}
 
+    public CambioEstado(Estado estadoParametro){
+        this.estadoNombre = estadoParametro.getNombre();
+        this.estadoAmbito = estadoParametro.getAmbito();
+        this.estado = estadoParametro;
+        this.fechaHoraInicio = LocalDateTime.now();
+    }
+
     public LocalDateTime getFechaHoraInicio() {
         return fechaHoraInicio;
     }
@@ -94,6 +101,13 @@ public class CambioEstado {
 
     public void setMotivoFueraServicio(List<MotivoFueraServicio> motivoFueraServicio) {
         this.motivoFueraServicio = motivoFueraServicio;
+    }
+
+    public Boolean esEstadoActual(){
+        if (this.fechaHoraFin == null) {
+            return true;
+        }
+        return false;
     }
 
     // getters, setters, constructor vacío

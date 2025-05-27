@@ -1,5 +1,6 @@
 package com.grupo7.dsi.tpai.controllers;
 
+import com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,20 +12,17 @@ import org.springframework.stereotype.Component;
 public class VentanaPrincipalController {
 
     @Autowired
-    private RegistrarRevisionManualController gestorRevisionManual;
+    private PantallaRegistrarRevisionManual pantallaRegistrar;
 
-    @FXML
-    private Button btnRegistrarRevision;
-
-    @FXML
-    private Button btnSalir;
+    @FXML private Button btnRegistrarRevision;
+    @FXML private Button btnSalir;
 
     @FXML
     private void handleRegistrarRevision() {
-        // ① Delegamos al gestor: él cargará el FXML, guardará la boundary y volcará los datos
-        gestorRevisionManual.registrarResultadoRevisionManual();
+        // ① mensaje optRegistrarResultadoDeRevisionManual()
+        pantallaRegistrar.optRegistrarResultadoDeRevisionManual();
 
-        // ② Cerramos la ventana actual
+        // ② cerramos la ventana actual
         Stage current = (Stage) btnRegistrarRevision.getScene().getWindow();
         current.close();
     }

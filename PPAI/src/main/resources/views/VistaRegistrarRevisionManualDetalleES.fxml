@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual"
+            prefWidth="800" prefHeight="600"
+            style="-fx-background-color: #f9f9f9;">
+
+    <VBox spacing="20"
+          AnchorPane.topAnchor="20"
+          AnchorPane.leftAnchor="20"
+          AnchorPane.rightAnchor="20"
+          AnchorPane.bottomAnchor="70"
+          style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30;">
+
+        <Label text="Detalle del Evento Sísmico"
+               style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+        <GridPane hgap="15" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="200" halignment="RIGHT"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+
+            <children>
+                <Label text="Fecha y Hora:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label fx:id="lblFechaHoraOcurrencia" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Origen de Generación:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label fx:id="lblOrigenGeneracion" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Fecha Fin:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label fx:id="lblFechaHoraFin" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Latitud Epicentro:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <Label fx:id="lblLatitudEpicentro" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Longitud Epicentro:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <Label fx:id="lblLongitudEpicentro" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Latitud Hipocentro:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <Label fx:id="lblLatitudHipocentro" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Longitud Hipocentro:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <Label fx:id="lblLongitudHipocentro" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <Label text="Valor Magnitud:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <Label fx:id="lblValorMagnitud" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                <Label text="Magnitud Richter:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <Label fx:id="lblMagnitudRichter" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                <Label text="Clasificación Sismo:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                <Label fx:id="lblClasificacionSismo" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
+                <Label text="Alcance Sismo:" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
+                <Label fx:id="lblAlcanceSismo" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+
+                <Label text="Estado Actual:" GridPane.rowIndex="11" GridPane.columnIndex="0"/>
+                <Label fx:id="lblEstadoActual" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
+
+                <Label text="Analista Supervisor:" GridPane.rowIndex="12" GridPane.columnIndex="0"/>
+                <Label fx:id="lblAnalistaSupervisor" GridPane.rowIndex="12" GridPane.columnIndex="1"/>
+            </children>
+        </GridPane>
+    </VBox>
+
+    <Button fx:id="btnSiguiente"
+            text="Siguiente"
+            AnchorPane.bottomAnchor="20"
+            AnchorPane.rightAnchor="20"
+            prefWidth="120" prefHeight="30"
+            style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;"/>
+</AnchorPane>

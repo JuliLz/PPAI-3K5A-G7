@@ -36,8 +36,16 @@ public class Estado {
         this.ambito = ambito;
     }
 
-    public Boolean estaPendienteRevision() {
-        if (nombre.equals("Pendiente revision") && ambito.equals("Evento sismico")) {
+    public Boolean esNombre(String nombre) {
+        return this.nombre.equals(nombre);
+    }
+
+    public Boolean esAmbito(String ambito) {
+        return this.ambito.equals(ambito);
+    }
+
+    public Boolean sosBloqueadoEnRevision() {
+        if (esNombre("Bloqueado en revision") && esAmbito("Evento sismico")) {
             return true;
         }
         return false;

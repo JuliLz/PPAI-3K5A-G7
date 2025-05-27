@@ -202,9 +202,29 @@ public class EventoSismico {
     }
 
     public Boolean estaPendienteRevision() {
-        if (estadoActual.getNombre().equals("Pendiente revision") && estadoActual.getAmbito().equals("Evento sismico")) {
+        if (estadoActual.esNombre("Pendiente revision") && estadoActual.esAmbito("Evento sismico")) {
             return true;
         }
         return false;
+    }
+
+    public void cambioEstadoBloqueadoEnRevision(Estado estadoBloqueado) {
+        // Validar que el estadoBloqueado no sea null
+        if (estadoBloqueado == null) {
+            throw new IllegalArgumentException("El estadoBloqueado no puede ser null, revise la base de datos");
+        }
+
+        // Setear fin del estado actual
+        for (CambioEstado cambioEstado : cambiosEstado) {
+            if (cambioEstado.esEstadoActual()){
+                cambioEstado.setFechaHoraFin(LocalDateTime.now());
+                break;
+            }
+        }
+
+        // Crear nuevo cambio de estado
+        CambioEstado cambioEstadoBloqueadoEnRevision = new CambioEstado(estadoBloqueado);
+        this.cambiosEstado.add(cambioEstadoBloqueadoEnRevision);
+        this.estadoActual = estadoBloqueado;
     }
 }

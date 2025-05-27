@@ -5,21 +5,19 @@ import com.grupo7.dsi.tpai.controllers.RegistrarRevisionManualController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -28,128 +26,175 @@ import java.util.stream.Collectors;
 @Component
 public class PantallaRegistrarRevisionManual implements Initializable {
 
+    @Autowired
+    private RegistrarRevisionManualController gestor;
+
+    @FXML private AnchorPane rootPane;  // Contenedor base definido en VistaRegistrarRevisionManual.fxml
+
+    // ↓ Estos se inyectan al cargar la tabla ↓
     @FXML private TableView<EventoSismicoDTO> tablaEventos;
     @FXML private TableColumn<EventoSismicoDTO, Boolean> colSeleccionar;
     @FXML private TableColumn<EventoSismicoDTO, String>  colFechaHora;
     @FXML private TableColumn<EventoSismicoDTO, String>  colMagnitud;
     @FXML private TableColumn<EventoSismicoDTO, String>  colLugarOrigen;
 
-    @Autowired
-    private RegistrarRevisionManualController gestorRegistrarRevisionManual;
+    // ↓ Estos se inyectan al cargar el detalle ↓
+    @FXML private Label lblFechaHoraOcurrencia;
+    @FXML private Label lblOrigenGeneracion;
+    @FXML private Label lblFechaHoraFin;
+    @FXML private Label lblLatitudEpicentro;
+    @FXML private Label lblLongitudEpicentro;
+    @FXML private Label lblLatitudHipocentro;
+    @FXML private Label lblLongitudHipocentro;
+    @FXML private Label lblValorMagnitud;
+    @FXML private Label lblMagnitudRichter;
+    @FXML private Label lblClasificacionSismo;
+    @FXML private Label lblAlcanceSismo;
+    @FXML private Label lblEstadoActual;
+    @FXML private Label lblAnalistaSupervisor;
+    // …más Labels según tus campos de detalle…
+
+    private Stage stage;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize(URL loc, ResourceBundle res) {
+        // no hago nada: espero al optRegistrar…
+    }
+
+    public void optRegistrarResultadoDeRevisionManual() {
         habilitarVentana();
+        gestor.registrarResultadoDeRevisionManual();
     }
 
     private void habilitarVentana() {
-        colSeleccionar.setCellValueFactory(c -> c.getValue().seleccionadoProperty());
-        colSeleccionar.setCellFactory(CheckBoxTableCell.forTableColumn(colSeleccionar));
-        colFechaHora.setCellValueFactory(c -> c.getValue().fechaHoraProperty());
-        colMagnitud.setCellValueFactory(c -> c.getValue().magnitudProperty());
-        colLugarOrigen.setCellValueFactory(c -> c.getValue().lugarOrigenProperty());
+        if (stage == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/views/PantallaRegistrarRevisionManual.fxml")
+                );
+                loader.setControllerFactory(cls -> this);
+                Parent root = loader.load();
+                stage = new Stage();
+                stage.setTitle("Registrar Revisión Manual");
+                stage.setScene(new Scene(root));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        stage.show();
     }
 
-    public void mostrarEventosSismicosPendientesDeRevision(List<String> raw) {
-        List<EventoSismicoDTO> dtos = raw.stream()
-                .map(linea -> {
-                    String[] p = linea.split(",", -1);
-                    return new EventoSismicoDTO(
-                            p.length>0 ? p[0] : "",  // fechaHora
-                            p.length>1 ? p[1] : "",  // origenGeneracion
-                            p.length>2 ? p[2] : "",  // magnitud
-                            p.length>3 ? p[3] : ""   // lugarOrigen
-                    );
-                })
-                .collect(Collectors.toList());
+    public void mostrarEventosSismicosPendientesDeRevision(List<String> raws) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/views/VistaRegistrarRevisionManualTabla.fxml")
+            );
+            loader.setControllerFactory(cls -> this);
+            AnchorPane tablaView = loader.load();
 
-        ObservableList<EventoSismicoDTO> observableEventos = FXCollections.observableArrayList(dtos);
-        tablaEventos.setItems(observableEventos);
+            rootPane.getChildren().setAll(tablaView);
+            AnchorPane.setTopAnchor(tablaView, 0.0);
+            AnchorPane.setBottomAnchor(tablaView, 0.0);
+            AnchorPane.setLeftAnchor(tablaView, 0.0);
+            AnchorPane.setRightAnchor(tablaView, 0.0);
 
-        // Listener para forzar selección única
-        for (EventoSismicoDTO evento : observableEventos) {
-            evento.seleccionadoProperty().addListener((obs, old, neu) -> {
-                if (neu) {
-                    observableEventos.stream()
-                            .filter(o -> o != evento)
-                            .forEach(o -> o.seleccionadoProperty().set(false));
-                }
-            });
+            // 1) activa edición
+            tablaEventos.setEditable(true);
+            colSeleccionar.setEditable(true);
+
+            // 2) configura las columnas
+            colSeleccionar.setCellValueFactory(c -> c.getValue().seleccionadoProperty());
+            colSeleccionar.setCellFactory(CheckBoxTableCell.forTableColumn(colSeleccionar));
+            colFechaHora .setCellValueFactory(c -> c.getValue().fechaHoraProperty());
+            colMagnitud .setCellValueFactory(c -> c.getValue().magnitudProperty());
+            colLugarOrigen.setCellValueFactory(c -> c.getValue().lugarOrigenProperty());
+
+            // 3) llena con datos
+            ObservableList<EventoSismicoDTO> data = FXCollections.observableArrayList(
+                    raws.stream().map(l -> {
+                        String[] p = l.split(",", -1);
+                        return new EventoSismicoDTO(
+                                p.length>0?p[0]:"",
+                                p.length>1?p[1]:"",
+                                p.length>2?p[2]:"",
+                                p.length>3?p[3]:""
+                        );
+                    }).collect(Collectors.toList())
+            );
+            tablaEventos.setItems(data);
+
+            // 4) forzar sólo uno seleccionado
+            data.forEach(e ->
+                    e.seleccionadoProperty().addListener((o,old,n) -> {
+                        if (n) data.stream()
+                                .filter(x->x!=e)
+                                .forEach(x->x.seleccionadoProperty().set(false));
+                    })
+            );
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
     @FXML
     private void tomarSeleccionEventoSismico() {
-        EventoSismicoDTO seleccionado = tablaEventos.getItems().stream()
+        EventoSismicoDTO sel = tablaEventos.getItems().stream()
                 .filter(EventoSismicoDTO::isSeleccionado)
-                .findFirst()
-                .orElse(null);
+                .findFirst().orElse(null);
 
-        if (seleccionado == null) {
-            Alert alerta = new Alert(Alert.AlertType.WARNING);
-            alerta.setTitle("Selección requerida");
-            alerta.setHeaderText(null);
-            alerta.setContentText("Debe seleccionar un evento sísmico para continuar.");
-            alerta.showAndWait();
+        if (sel == null) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Debe seleccionar un evento sísmico").showAndWait();
             return;
         }
 
-        gestorRegistrarRevisionManual.tomarSeleccionEventoSismico(
-                seleccionado.getFechaHora(),
-                seleccionado.getOrigenGeneracion()
+        gestor.tomarSeleccionEventoSismico(
+                sel.getFechaHora(), sel.getOrigenGeneracion()
         );
-
-        // ¡Y cerramos la ventana!
-        Stage stage = (Stage) tablaEventos.getScene().getWindow();
-        stage.close();
     }
 
     public void mostrarDatosEventoSismicoSeleccionado(List<String> datos) {
-        // Nuevo diálgo como Stage modal
-        Stage dialog = new Stage();
-        dialog.setTitle("Detalle del Evento Sísmico");
-        dialog.initModality(Modality.APPLICATION_MODAL);
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/views/VistaRegistrarRevisionManualDetalleES.fxml")
+            );
+            loader.setControllerFactory(cls -> this);
+            AnchorPane detalleView = loader.load();
 
-        // GridPane con espaciado y padding
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(8);
-        grid.setPadding(new Insets(20));
+            rootPane.getChildren().setAll(detalleView);
+            AnchorPane.setTopAnchor(detalleView, 0.0);
+            AnchorPane.setBottomAnchor(detalleView, 0.0);
+            AnchorPane.setLeftAnchor(detalleView, 0.0);
+            AnchorPane.setRightAnchor(detalleView, 0.0);
 
-        // Encabezados de columnas
-        Label headerKey = new Label("Propiedad");
-        headerKey.setStyle("-fx-font-weight: bold; -fx-underline: true;");
-        Label headerValue = new Label("Valor");
-        headerValue.setStyle("-fx-font-weight: bold; -fx-underline: true;");
-        grid.add(headerKey, 0, 0);
-        grid.add(headerValue, 1, 0);
+            // Esperar a que se inyecten los @FXML antes de usarlos
+            javafx.application.Platform.runLater(() -> {
+                datos.forEach(line -> {
+                    String[] kv = line.split(":", 2);
+                    if (kv.length < 2) return;
 
-        // Rellenar filas con cada par clave:valor
-        for (int i = 0; i < datos.size(); i++) {
-            String linea = datos.get(i);
-            String[] parts = linea.split(":", 2);
-            String clave = parts[0].replaceAll("([a-z])([A-Z])","$1 $2"); // camelCase → separado
-            String valor = parts.length > 1 ? parts[1] : "";
+                    switch (kv[0]) {
+                        case "fechaHoraOcurrencia":     lblFechaHoraOcurrencia.setText(kv[1]); break;
+                        case "origenGeneracion":        lblOrigenGeneracion.setText(kv[1]); break;
+                        case "fechaHoraFin":            lblFechaHoraFin.setText(kv[1]); break;
+                        case "latitudEpicentro":        lblLatitudEpicentro.setText(kv[1]); break;
+                        case "longitudEpicentro":       lblLongitudEpicentro.setText(kv[1]); break;
+                        case "latitudHipocentro":       lblLatitudHipocentro.setText(kv[1]); break;
+                        case "longitudHipocentro":      lblLongitudHipocentro.setText(kv[1]); break;
+                        case "valorMagnitud":           lblValorMagnitud.setText(kv[1]); break;
+                        case "magnitudRichter":         lblMagnitudRichter.setText(kv[1]); break;
+                        case "clasificacionSismo":      lblClasificacionSismo.setText(kv[1]); break;
+                        case "alcanceSismo":            lblAlcanceSismo.setText(kv[1]); break;
+                        case "estadoActual":            lblEstadoActual.setText(kv[1]); break;
+                        case "analistaSupervisor":      lblAnalistaSupervisor.setText(kv[1]); break;
+                    }
+                });
+            });
 
-            Label lblKey = new Label(clave);
-            Label lblValue = new Label(valor);
-            grid.add(lblKey, 0, i + 1);
-            grid.add(lblValue, 1, i + 1);
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
-
-        // Botón de cerrar
-        Button btnCerrar = new Button("Cerrar");
-        btnCerrar.setOnAction(e -> dialog.close());
-        HBox hb = new HBox(btnCerrar);
-        hb.setAlignment(Pos.CENTER);
-        hb.setPadding(new Insets(10, 0, 0, 0));
-
-        // Contenedor principal
-        VBox root = new VBox(grid, hb);
-        root.setSpacing(5);
-
-        dialog.setScene(new Scene(root));
-        dialog.showAndWait();
     }
-
 }

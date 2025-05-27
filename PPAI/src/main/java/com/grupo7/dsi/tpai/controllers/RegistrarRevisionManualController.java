@@ -1,72 +1,68 @@
 package com.grupo7.dsi.tpai.controllers;
 
 import com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual;
+import com.grupo7.dsi.tpai.models.Estado;
 import com.grupo7.dsi.tpai.models.EventoSismico;
+import com.grupo7.dsi.tpai.service.EstadoService;
 import com.grupo7.dsi.tpai.service.EventoSismicoService;
 import jakarta.annotation.PostConstruct;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class RegistrarRevisionManualController {
 
     @Autowired
-    private ApplicationContext springContext;
-
-    private PantallaRegistrarRevisionManual pantallaRegistrarRevisionManual;
-
-    private final EventoSismicoService eventoSismicoService;
-    private List<EventoSismico> eventosSismicosBDD;
-
-    private EventoSismico eventosSismicoSeleccionado;
-
+    private EventoSismicoService eventoSismicoService;
+    private List<EventoSismico> eventosBDD;
     @Autowired
-    public RegistrarRevisionManualController(EventoSismicoService eventoSismicoService) {
-        this.eventoSismicoService = eventoSismicoService;
-    }
+    private EstadoService estadoService;
+    private List<Estado> estadosBDD;
+
+    @Autowired @Lazy
+    private PantallaRegistrarRevisionManual pantalla;
+
+    private EventoSismico eventoSismicoSeleccionado;
 
     @PostConstruct
     private void init() {
-        this.eventosSismicosBDD = eventoSismicoService.findAll();
+        this.eventosBDD = eventoSismicoService.findAll();
+        this.estadosBDD = estadoService.findAll();
     }
 
-    public void registrarResultadoRevisionManual(){
-        List<String> eventosPendientesRevision = buscarEventosSismicosPendientesRevision();
-        mostrarPantallaRevisionManual(eventosPendientesRevision);
+    public void registrarResultadoDeRevisionManual() {
+        List<String> raws = buscarEventosSismicosPendientesDeRevision();
+        pantalla.mostrarEventosSismicosPendientesDeRevision(raws);
     }
 
-    public List<String> buscarEventosSismicosPendientesRevision() {
-        //Buscar los eventos sismicos pendientes de revisión
-        List<EventoSismico> eventosPendientes = new ArrayList<>();
-        for (EventoSismico eventoBDD : eventosSismicosBDD) {
-            if (eventoBDD.estaPendienteRevision()){
-                eventosPendientes.add(eventoBDD);
+    public List<String> buscarEventosSismicosPendientesDeRevision() {
+        List<EventoSismico> eventoSismicosPendientes = new ArrayList<>();
+        for (EventoSismico evento : eventosBDD) {
+            if (evento.estaPendienteRevision()) {
+                eventoSismicosPendientes.add(evento);
             }
         }
+        // ordenar por fecha y hora de ocurrencia
+        eventoSismicosPendientes = filtrarPorFechayHoraDeOcurrencia(eventoSismicosPendientes);
 
-        // Filtrar por fecha y hora de ocurrencia
-        eventosPendientes = filtrarPorFechayHoraDeOcurrencia(eventosPendientes);
-
-        // Devolver los eventos para mostrar en la pantalla
-        return eventosPendientes.stream()
-                .map(evento -> evento.getFechaHoraOcurrencia() + "," +
-                        evento.getOrigenGeneracion().getNombre() + "," +
-                        evento.getMagnitud().getNumero() + "," +
-                        evento.getOrigenGeneracion().getNombre())
-                .collect(Collectors.toList());
+        // convertir a String con 4 campos separados por coma
+        List<String> raws = new ArrayList<>();
+        for (EventoSismico evento : eventoSismicosPendientes) {
+            // antes ponías clasificación en p[3], ahora repetimos origen:
+            String raw = String.join(",",
+                    evento.getFechaHoraOcurrencia().toString(),
+                    evento.getOrigenGeneracion().getNombre(),
+                    String.valueOf(evento.getMagnitud().getNumero()),
+                    evento.getOrigenGeneracion().getNombre()    // <-- aquí
+            );
+            raws.add(raw);
+        }
+        return raws;
     }
 
     private List<EventoSismico> filtrarPorFechayHoraDeOcurrencia(List<EventoSismico> eventos) {
@@ -75,82 +71,60 @@ public class RegistrarRevisionManualController {
                 .collect(Collectors.toList());
     }
 
-    public void mostrarPantallaRevisionManual(List<String> eventosPendientesRevision) {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/views/PantallaRegistrarRevisionManual.fxml")
-            );
-            loader.setControllerFactory(springContext::getBean);
-            Parent root = loader.load();
-
-            // guardo la instancia del controller-boundary
-            pantallaRegistrarRevisionManual = loader.getController();
-
-            // muestro la ventana
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Registrar Revisión Manual");
-            stage.show();
-
-            // justo después, pido los raw y los paso a la boundary
-            List<String> raw = eventosPendientesRevision;
-            pantallaRegistrarRevisionManual.mostrarEventosSismicosPendientesDeRevision(raw);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void tomarSeleccionEventoSismico(String fechaHoraStr, String nombreOrigen){
-        LocalDateTime fechaHora;
-        try {
-            fechaHora = LocalDateTime.parse(fechaHoraStr); //
-        } catch (Exception e) {
-            System.out.println("Error al convertir fechaHoraStr: " + e.getMessage());
-            return;
-        }
-
-        for (EventoSismico evento : eventosSismicosBDD) {
-            if (evento.getFechaHoraOcurrencia().equals(fechaHora)
-                    && evento.getOrigenGeneracion().getNombre().equals(nombreOrigen)) {
-                this.eventosSismicoSeleccionado = evento;
-                System.out.println("Evento seleccionado: " + eventosSismicoSeleccionado);
-                break;
+    public void tomarSeleccionEventoSismico(String fechaHoraStr, String origen) {
+        LocalDateTime fecha = LocalDateTime.parse(fechaHoraStr);
+        // busco el evento sísmico seleccionado
+        for (EventoSismico evento : eventosBDD) {
+            if (evento.getFechaHoraOcurrencia().equals(fecha)
+                    && evento.getOrigenGeneracion().getNombre().equals(origen)) {
+                this.eventoSismicoSeleccionado = evento;
             }
         }
-        List<String> datosEventoSismicoSeleccionado = buscarDatosEventoSismicoSeleccionado();
-        pantallaRegistrarRevisionManual.mostrarDatosEventoSismicoSeleccionado(datosEventoSismicoSeleccionado);
+
+        // Cambio de estado del evento sísmico
+        cambioEstadoEventoSismico();
+
+        // Buscar los datos del evento sismico
+        buscarDatosEventoSismicoSeleccionado();
     }
 
-    public List<String> buscarDatosEventoSismicoSeleccionado() {
-        if (eventosSismicoSeleccionado == null) {
-            return Collections.emptyList();
+    private void cambioEstadoEventoSismico() {
+        Estado estadoBloqueado = estadosBDD.stream()
+                .filter(estado -> estado.sosBloqueadoEnRevision())
+                .findFirst()
+                .orElse(null);
+
+        // Cambiar el estado del evento sísmico a "Bloqueado"
+        this.eventoSismicoSeleccionado.cambioEstadoBloqueadoEnRevision(estadoBloqueado);
+
+    }
+
+    private void buscarDatosEventoSismicoSeleccionado() {
+        if (eventoSismicoSeleccionado == null) {
+            pantalla.mostrarDatosEventoSismicoSeleccionado(Collections.emptyList()); // no hay evento seleccionado
         }
 
         List<String> datos = new ArrayList<>();
-        datos.add("FechaHoraOcurrencia:" + eventosSismicoSeleccionado.getFechaHoraOcurrencia());
-        datos.add("OrigenGeneracion:"     + eventosSismicoSeleccionado.getOrigenGeneracion().getNombre());
-        datos.add("FechaHoraFin:"         + (eventosSismicoSeleccionado.getFechaHoraFin() != null
-                ? eventosSismicoSeleccionado.getFechaHoraFin()
-                : ""));
-        datos.add("LatitudEpicentro:"     + eventosSismicoSeleccionado.getLatitudEpicentro());
-        datos.add("LongitudEpicentro:"    + eventosSismicoSeleccionado.getLongitudEpicentro());
-        datos.add("LatitudHipocentro:"    + eventosSismicoSeleccionado.getLatitudHipocentro());
-        datos.add("LongitudHipocentro:"   + eventosSismicoSeleccionado.getLongitudHipocentro());
-        datos.add("ValorMagnitud:"        + eventosSismicoSeleccionado.getValorMagnitud());
-        datos.add("MagnitudRichter:"      + eventosSismicoSeleccionado.getMagnitud().getNumero());
-        datos.add("ClasificacionSismo:"   + eventosSismicoSeleccionado.getClasificacion().getNombre());
-        datos.add("AlcanceSismo:"         + eventosSismicoSeleccionado.getAlcanceSismo().getNombre());
-        datos.add("EstadoActual:"         + eventosSismicoSeleccionado.getEstadoActual().getNombre());
-        if (eventosSismicoSeleccionado.getAnalistaSupervisor() != null) {
-            datos.add("AnalistaSupervisor:"
-                    + eventosSismicoSeleccionado.getAnalistaSupervisor().getNombre()
-                    + " (Legajo " + eventosSismicoSeleccionado.getAnalistaSupervisor().getId() + ")");
+        datos.add("fechaHoraOcurrencia:" + eventoSismicoSeleccionado.getFechaHoraOcurrencia());
+        datos.add("origenGeneracion:"     + eventoSismicoSeleccionado.getOrigenGeneracion().getNombre());
+        datos.add("fechaHoraFin:"         + Optional.ofNullable(eventoSismicoSeleccionado.getFechaHoraFin()).orElse(null));
+        datos.add("latitudEpicentro:"     + eventoSismicoSeleccionado.getLatitudEpicentro());
+        datos.add("longitudEpicentro:"    + eventoSismicoSeleccionado.getLongitudEpicentro());
+        datos.add("latitudHipocentro:"    + eventoSismicoSeleccionado.getLatitudHipocentro());
+        datos.add("longitudHipocentro:"   + eventoSismicoSeleccionado.getLongitudHipocentro());
+        datos.add("valorMagnitud:"        + eventoSismicoSeleccionado.getValorMagnitud());
+        datos.add("magnitudRichter:"      + eventoSismicoSeleccionado.getMagnitud().getNumero());
+        datos.add("clasificacionSismo:"   + eventoSismicoSeleccionado.getClasificacion().getNombre());
+        datos.add("alcanceSismo:"         + eventoSismicoSeleccionado.getAlcanceSismo().getNombre());
+        datos.add("estadoActual:"         + eventoSismicoSeleccionado.getEstadoActual().getNombre());
+        if (eventoSismicoSeleccionado.getAnalistaSupervisor() != null) {
+            datos.add("analistaSupervisor:"
+                    + eventoSismicoSeleccionado.getAnalistaSupervisor().getNombre()
+                    + " (Legajo " + eventoSismicoSeleccionado.getAnalistaSupervisor().getId() + ")");
         } else {
-            datos.add("AnalistaSupervisor:N/A");
+            datos.add("analistaSupervisor:N/A");
         }
 
-        // Si quisieras, podrías agregar cambios de estado o serie temporal también…
-        return datos;
+        pantalla.mostrarDatosEventoSismicoSeleccionado(datos);
     }
 }

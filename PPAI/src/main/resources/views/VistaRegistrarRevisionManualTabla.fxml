@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.grupo7.dsi.tpai.boundaries.PantallaRegistrarRevisionManual"
+            prefWidth="800" prefHeight="600"
+            style="-fx-background-color: #ffffff; -fx-border-color: #dddddd; -fx-border-radius: 10; -fx-background-radius: 10;">
+
+    <TableView fx:id="tablaEventos"
+               AnchorPane.topAnchor="20"    AnchorPane.bottomAnchor="70"
+               AnchorPane.leftAnchor="20"   AnchorPane.rightAnchor="20"
+               style="-fx-font-size: 14px;">
+
+        <columns>
+            <TableColumn fx:id="colSeleccionar"
+                         text="Seleccionar" prefWidth="100"
+                         editable="true"
+                         sortable="false"/>
+            <TableColumn fx:id="colFechaHora"
+                         text="Fecha y Hora" prefWidth="200"
+                         sortable="false"/>
+            <TableColumn fx:id="colMagnitud"
+                         text="Magnitud" prefWidth="150"
+                         sortable="false"/>
+            <TableColumn fx:id="colLugarOrigen"
+                         text="Lugar Origen" prefWidth="250"
+                         sortable="false"/>
+        </columns>
+    </TableView>
+
+    <Button fx:id="btnContinuar"
+            text="Continuar"
+            onAction="#tomarSeleccionEventoSismico"
+            AnchorPane.bottomAnchor="20"
+            AnchorPane.rightAnchor="20"
+            prefWidth="120" prefHeight="30"
+            style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5;"/>
+</AnchorPane>
