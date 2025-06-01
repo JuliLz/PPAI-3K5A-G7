@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 public class EstacionSismologica {
@@ -21,6 +22,18 @@ public class EstacionSismologica {
     private Integer nroCertificacionAdquisicion;
 
     public EstacionSismologica() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        EstacionSismologica that = (EstacionSismologica) o;
+        return Objects.equals(codigoEstacion, that.codigoEstacion) && Objects.equals(documentoCertificacionAdq, that.documentoCertificacionAdq) && Objects.equals(fechaSolicitudCertificacion, that.fechaSolicitudCertificacion) && Objects.equals(latitud, that.latitud) && Objects.equals(longitud, that.longitud) && Objects.equals(nombre, that.nombre) && Objects.equals(nroCertificacionAdquisicion, that.nroCertificacionAdquisicion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codigoEstacion, documentoCertificacionAdq, fechaSolicitudCertificacion, latitud, longitud, nombre, nroCertificacionAdquisicion);
+    }
 
     public EstacionSismologica(Integer codigoEstacion, String documentoCertificacionAdq, LocalDate fechaSolicitudCertificacion, String latitud, String longitud, String nombre, Integer nroCertificacionAdquisicion) {
         this.codigoEstacion = codigoEstacion;

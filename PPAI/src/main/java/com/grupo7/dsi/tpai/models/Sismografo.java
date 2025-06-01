@@ -3,6 +3,7 @@ package com.grupo7.dsi.tpai.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,18 +16,19 @@ public class Sismografo {
     private LocalDate fechaAdquisicion;
 
     @ManyToOne
+    @JoinColumn(name = "codigo_estacion") // columna FK en tabla sismografo
+    private EstacionSismologica estacionSismologica;
+
+    @ManyToOne
     @JoinColumns({
             @JoinColumn(name = "nombreModelo", referencedColumnName = "nombreModelo"),
             @JoinColumn(name = "nombreFabricante", referencedColumnName = "nombreFabricante")
     })
     private ModeloSismografo modelo;
 
-    @OneToOne
-    @JoinColumns({
-            @JoinColumn(name = "serie_fecha_hora_registro", referencedColumnName = "fechaHoraRegistro"),
-            @JoinColumn(name = "serie_fecha_hora_inicio", referencedColumnName = "fechaHoraInicioRegistroMuestras")
-    })
-    private SerieTemporal serieTemporal;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "sismografo_id")
+    private List<SerieTemporal> seriesTemporales;
 
     @ManyToOne
     @JoinColumns({
@@ -46,6 +48,7 @@ public class Sismografo {
     private PlanConstruccionES planesConstruccionES;
 
     public Sismografo() {
+        this.seriesTemporales = new ArrayList<>();
     }
 
     public Sismografo(Integer identificadorSismografo, Integer nroSerie, LocalDate fechaAdquisicion, ModeloSismografo modelo, SerieTemporal serieTemporal, Estado estadoActual, List<CambioEstado> cambiosEstado, List<Reparacion> reparaciones, PlanConstruccionES planesConstruccionES) {
@@ -53,7 +56,7 @@ public class Sismografo {
         this.nroSerie = nroSerie;
         this.fechaAdquisicion = fechaAdquisicion;
         this.modelo = modelo;
-        this.serieTemporal = serieTemporal;
+        this.seriesTemporales = new ArrayList<>();
         this.estadoActual = estadoActual;
         this.cambiosEstado = cambiosEstado;
         this.reparaciones = reparaciones;
@@ -92,12 +95,12 @@ public class Sismografo {
         this.modelo = modelo;
     }
 
-    public SerieTemporal getSerieTemporal() {
-        return serieTemporal;
+   public List<SerieTemporal> getSeriesTemporales() {
+        return seriesTemporales;
     }
 
-    public void setSerieTemporal(SerieTemporal serieTemporal) {
-        this.serieTemporal = serieTemporal;
+    public void setSeriesTemporales(List<SerieTemporal> seriesTemporales) {
+        this.seriesTemporales = seriesTemporales;
     }
 
     public Estado getEstadoActual() {
@@ -130,5 +133,13 @@ public class Sismografo {
 
     public void setPlanesConstruccionES(PlanConstruccionES planesConstruccionES) {
         this.planesConstruccionES = planesConstruccionES;
+    }
+
+    public EstacionSismologica getEstacionSismologica() {
+        return estacionSismologica;
+    }
+
+    public void setEstacionSismologica(EstacionSismologica estacionSismologica) {
+        this.estacionSismologica = estacionSismologica;
     }
 }

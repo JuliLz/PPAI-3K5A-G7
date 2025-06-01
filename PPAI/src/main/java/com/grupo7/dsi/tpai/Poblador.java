@@ -9,6 +9,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,8 +27,14 @@ public class Poblador implements CommandLineRunner {
     @Autowired private MagnitudRichterService magnitudRichterService;
     @Autowired private ClasificacionSismoService clasificacionSismoService;
     @Autowired private EventoSismicoService eventoSismicoService;
+    @Autowired private EstacionSismologicaService estacionSismologicaService;
+    @Autowired private SismografoService sismografoService;
+    @Autowired private SerieTemporalService serieTemporalService;
+    @Autowired private MuestraSismicaService muestraSismicaService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         // Arranca un contexto Spring ligero SOLO con Poblador
         SpringApplication.run(Poblador.class, args).close();
     }
@@ -45,6 +52,12 @@ public class Poblador implements CommandLineRunner {
             Estado estadoConfirmado = new Estado();
             estadoConfirmado.setAmbito("Evento sismico");
             estadoConfirmado.setNombre("Confirmado");
+            estadoService.save(estadoConfirmado);
+
+            Estado estadoBloqueado = new Estado();
+            estadoBloqueado.setAmbito("Evento sismico");
+            estadoBloqueado.setNombre("Bloqueado en revision");
+            estadoService.save(estadoBloqueado);
 
             Estado estadoAutoDetectado = new Estado();
             estadoAutoDetectado.setAmbito("Evento sismico");
@@ -97,6 +110,16 @@ public class Poblador implements CommandLineRunner {
             cambiosEstado.add(cambioEstado2);
             cambiosEstado.add(cambioEstado3);
 
+
+            // Estación
+            EstacionSismologica estacion = new EstacionSismologica();
+            estacion.setNombre("Estación Central");
+            estacion.setLatitud("-31.42");
+            estacion.setLongitud("-64.18");
+            estacion.setDocumentoCertificacionAdq("DOC-123");
+            estacion.setFechaSolicitudCertificacion(LocalDate.of(2022, 5, 10));
+            estacion.setNroCertificacionAdquisicion(101);
+            estacion = estacionSismologicaService.save(estacion); // asumimos que tenés este service
 
 
 
@@ -196,7 +219,7 @@ public class Poblador implements CommandLineRunner {
             evento1.setAlcanceSismo(alcanceRegional);
             eventoSismicoService.save(evento1);
 
-// Evento Sismico 2
+            // Evento Sismico 2
             EventoSismico evento2 = new EventoSismico();
             evento2.setFechaHoraOcurrencia(LocalDateTime.of(2023, 12, 15, 18, 10));
             evento2.setFechaHoraFin(LocalDateTime.of(2023, 12, 15, 18, 50));
@@ -310,10 +333,100 @@ public class Poblador implements CommandLineRunner {
             evento8.setCambiosEstado(cambiosEstado);
             evento8.setClasificacion(clasificacionIntermedia); // Clasificacion 1
             evento8.setMagnitud(magnitudLeve); // 2.5f
-            evento8.setOrigenGeneracion(origenMendoza); // Cordoba
+            evento8.setOrigenGeneracion(origenMendoza); // Mendoza
             evento8.setAnalistaSupervisor(empleado);
             evento8.setAlcanceSismo(alcanceProvincial); // Local
             eventoSismicoService.save(evento8);
+
+
+            // SerieTemporal 1
+            SerieTemporal serie1 = new SerieTemporal();
+            serie1.setCondicionAlarma(false);
+            serie1.setFrecuenciaMuestreo(1.0f);
+            serie1.setFechaHoraRegistro(LocalDateTime.of(2025, 1, 1, 12, 0));
+            serie1.setFechaHoraInicioRegistroMuestras(LocalDateTime.of(2025, 1, 1, 12, 0));
+            serie1.setEstado(estadoPendienteRevision);
+
+            MuestraSismica muestra1 = new MuestraSismica();
+            muestra1.setFechaHoraMuestra(LocalDateTime.of(2025, 1, 1, 12, 0));
+            MuestraSismica muestra2 = new MuestraSismica();
+            muestra2.setFechaHoraMuestra(LocalDateTime.of(2025, 1, 1, 12, 5));
+
+            List<MuestraSismica> muestrasSerie1 = new ArrayList<>();
+            muestrasSerie1.add(muestra1);
+            muestrasSerie1.add(muestra2);
+            serie1.setMuestrasSismicas(muestrasSerie1);
+
+// SerieTemporal 2
+            SerieTemporal serie2 = new SerieTemporal();
+            serie2.setCondicionAlarma(true);
+            serie2.setFrecuenciaMuestreo(2.0f);
+            serie2.setFechaHoraRegistro(LocalDateTime.of(2025, 1, 2, 8, 0));
+            serie2.setFechaHoraInicioRegistroMuestras(LocalDateTime.of(2025, 1, 2, 8, 0));
+            serie2.setEstado(estadoAutoDetectado);
+
+            MuestraSismica muestra3 = new MuestraSismica();
+            muestra3.setFechaHoraMuestra(LocalDateTime.of(2025, 1, 2, 8, 0));
+            MuestraSismica muestra4 = new MuestraSismica();
+            muestra4.setFechaHoraMuestra(LocalDateTime.of(2025, 1, 2, 8, 10));
+
+            List<MuestraSismica> muestrasSerie2 = new ArrayList<>();
+            muestrasSerie2.add(muestra3);
+            muestrasSerie2.add(muestra4);
+            serie2.setMuestrasSismicas(muestrasSerie2);
+
+// Crear lista mutable para las series
+            List<SerieTemporal> seriesSismografo = new ArrayList<>();
+            seriesSismografo.add(serie1);
+            seriesSismografo.add(serie2);
+
+// Sismógrafo
+            Sismografo sismografo = new Sismografo();
+            sismografo.setIdentificadorSismografo(1);
+            sismografo.setNroSerie(1001);
+            sismografo.setFechaAdquisicion(LocalDate.of(2023, 6, 15));
+            sismografo.setEstadoActual(estadoPendienteRevision);
+            sismografo.setEstacionSismologica(estacion);
+            sismografo.setSeriesTemporales(seriesSismografo);
+
+// Agregar más series nuevas de prueba
+            for (int i = 0; i < 3; i++) {
+                    LocalDateTime inicio = LocalDateTime.of(2025, 5, i + 1, 10, 0);
+                    LocalDateTime registro = inicio.plusMinutes(1);
+                    boolean alarma = (i % 2) == 1;
+                    float frecuencia = 1.5f + i;
+
+                    MuestraSismica m1 = new MuestraSismica();
+                    m1.setFechaHoraMuestra(inicio.plusMinutes(5));
+                    MuestraSismica m2 = new MuestraSismica();
+                    m2.setFechaHoraMuestra(inicio.plusMinutes(10));
+
+                    List<MuestraSismica> muestrasNuevas = new ArrayList<>();
+                    muestrasNuevas.add(m1);
+                    muestrasNuevas.add(m2);
+
+                    SerieTemporal nuevaSerie = new SerieTemporal();
+                    nuevaSerie.setCondicionAlarma(alarma);
+                    nuevaSerie.setFrecuenciaMuestreo(frecuencia);
+                    nuevaSerie.setFechaHoraInicioRegistroMuestras(inicio);
+                    nuevaSerie.setFechaHoraRegistro(registro);
+                    nuevaSerie.setEstado(estadoPendienteRevision);
+                    nuevaSerie.setMuestrasSismicas(muestrasNuevas);
+
+                    sismografo.getSeriesTemporales().add(nuevaSerie);
+            }
+
+            // Asignar series del sismógrafo al evento1
+            List<SerieTemporal> seriesParaEvento = new ArrayList<>(sismografo.getSeriesTemporales());
+            evento1.setSeriesTemporal(seriesParaEvento);
+            eventoSismicoService.save(evento1);
+
+            sismografoService.save(sismografo);
+
+            Usuario usuario = new Usuario();
+            usuario.setEmpleado(empleado);
+            usuario.setNombreUsuario("Cristulo");
+            usuarioService.save(usuario);
 
         };
     }

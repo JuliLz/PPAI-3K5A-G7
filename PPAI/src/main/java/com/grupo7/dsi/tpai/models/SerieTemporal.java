@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @IdClass(SerieTemporalId.class)
@@ -26,7 +27,7 @@ public class SerieTemporal {
     })
     private Estado estado;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "serie_temporal_fecha_hora_registro", referencedColumnName = "fechaHoraRegistro")
     private List<MuestraSismica> muestrasSismicas;
 
@@ -88,5 +89,21 @@ public class SerieTemporal {
 
     public void setMuestrasSismicas(List<MuestraSismica> muestrasSismicas) {
         this.muestrasSismicas = muestrasSismicas;
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SerieTemporal that = (SerieTemporal) o;
+        return Objects.equals(fechaHoraRegistro, that.fechaHoraRegistro)
+                && Objects.equals(fechaHoraInicioRegistroMuestras, that.fechaHoraInicioRegistroMuestras);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fechaHoraRegistro, fechaHoraInicioRegistroMuestras);
     }
 }

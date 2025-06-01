@@ -9,11 +9,12 @@ import java.util.List;
 public class MuestraSismica {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private LocalDateTime fechaHoraMuestra;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "muestra_sismica_id") // la FK se guarda en DetalleMuestraSismica
     private List<DetalleMuestraSismica> detallesMuestraSismica;
 
